@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            body {
+                font-family: monospace;
+                background: pink;
+                text-align: center;
+            }
+            
+            #container {
+                width: 100%;
+                margin: 0 auto;
+            }
+            
+            h1 {
+                font-size: 90px;
+            }
+            #clock {
+                font-size: 3000%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <a href="#" id="action">GO!</a>
+            <h1 id="now">Now: <span></span></h1>
+            <div id="clock"></div>
+            <h1 id="next">Next: <span></span></h1>
+        </div>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.js"></script>
+        <script>
+            var interval = 45;
+            var rest = 45;
+            var noStations = 6;
+
+            var stations = [
+                'burpee',
+                'squat',
+                'lunge',
+                'dips',
+                'flys',
+                'sit-ups',
+                'push ups',
+                'pull ups',
+                'russian twists'
+            ];
+            
+            var colours = [
+                'green', 'orange', 'yellow', 'blue'
+            ];
+
+            var REST = 'Rest';
+
+            var $action, $now, $clock, $next;
+
+            var generateCircuit = function() {
+                var circuit = [];
+                _.shuffle(_.clone(stations)).slice(0, noStations).forEach(function(station) {
+                    circuit.push(station);
+                    circuit.push(REST);
+                });
+                circuit.pop();
+                console.log(circuit);
+                return circuit;
+            };
+
+            var go = function() {
+                var circuit = generateCircuit();
+                doStation(circuit);
+            };
+
+            var doStation = function(circuit) {
+                if (circuit.length) {
+                    var station = circuit.shift();
+                    var next = circuit[0];
+                    $now.text(station);
+                    if (next) {
+                        $next.text(next);
+                    } else {
+                        $next.text('');
+                    }
+
+                    runClock(station, function() {
+                        doStation(circuit);
+                    });
+                } else {
+                    $clock.text('DONE!');
+                }
+            };
+
+            var runClock = function(station, callback) {
+                var time = station === REST ? rest : interval;
+                setClockText(time);
+                var int = setInterval(function() {
+                    if (time === 1) {
+                        clearInterval(int);
+                        return callback();
+                    }
+                    setClockText(--time);
+                }, 1000);
+            };
+            
+            var setClockText = function(time) {
+                $clock.text(time);
+                $clock.css({color : colours[time%4]});
+            };
+
+
+            $(function() {
+                $action = $('#action');
+                $now = $('#now');
+                $next = $('#next');
+                $clock = $('#clock');
+
+                $action.click(go);
+            });
+        </script>
+    </body>
+</html>
